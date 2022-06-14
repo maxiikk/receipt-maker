@@ -1,11 +1,5 @@
-from os import system, name
 import os.path
 print("Receipt Maker 0.1\n")
-'''def clear():
-   if name == 'nt':
-      _ = system('cls')
-   else:
-   _ = system('clear')'''
 while 1:
     curr = input("Set Currency (E = Euro, D = Dollars, R = Rubles): ")
     if curr.upper() == 'E' or curr.upper() == 'D' or curr.upper() == 'R':
@@ -22,10 +16,11 @@ while 1:
 def makereceipt():
     store = input("Store: ")
     date = input("Date (DD/MM/YYYY): ")
-    print("Input price in " + curr + " and then the name of the product or -1 for exit \n-------------------------------------------------\n")
+    print("Input price in" + curr + " and then the name of the product or -1 for exit \n-------------------------------------------------\n")
     itemsnum = 0
     price = "0"
     item = "0"
+    total = 0
     prices = []
     items = []
     while price != "-1" or item != "-1":
@@ -42,6 +37,7 @@ def makereceipt():
             items.pop()
             break
         else:
+            total += float(price)
             price += curr
             prices.append(price)
         
@@ -52,7 +48,7 @@ def makereceipt():
             l += "_"
         else:
             l += a
-    filename = store + " " + l + ".txt"
+    filename = store + " " + l + curr + ".txt"
     exists = 0
     if os.path.isfile(filename):
         f = open(filename, 'a')
@@ -62,8 +58,22 @@ def makereceipt():
     
     if exists == 1:
         f.seek(0, 2)
+        with open(filename, "r") as fr:
+            lines = fr.readlines()
+            pos = 1
+            with open(filename, "w") as fw:
+                for line in lines:
+                    if pos == 5:
+                        line = line.replace("Total Cost: ", "")
+                        line = line.replace("\n", "")
+                        line = float(line)
+                        line += total
+                        fw.write("Total Cost: " + str(line) + curr + "\n")
+                    else:
+                        fw.write(line)
+                    pos+=1
     else:
-        f.write("                  Receipt\n-----------------------------------------------\nDate: " + date + "\nStore: " + store + "\n\n")
+        f.write("                  Receipt\n-----------------------------------------------\nDate: " + date + "\nStore: " + store + "\nTotal Cost: " + str(total) + "\n\n")
     i = 0
     for a in items:
         f.write("Product: " + a + "\nPrice: " + str(prices[i]) + "\n\n")
@@ -71,8 +81,7 @@ def makereceipt():
     f.close()
     print("Done!")
 
-makereceipt()
-
-exit = 0
-while exit != 1:
-    exit = int(input("type 1 for exit"))
+exit = 1
+while exit == 1:
+    makereceipt()
+    exit = int(input("type 1 to make another receipt\n"))
